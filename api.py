@@ -54,7 +54,7 @@ class PetFriends:
 
         return status, result
 
-    def add_new_pets(self, auth_key, name, animal_type, age, pet_photo):
+    def add_new_pet(self, auth_key, name, animal_type, age, pet_photo):
         """
         Этот метод позволяет добавить информацию о новом питомце.
 
@@ -126,6 +126,50 @@ class PetFriends:
         }
 
         response = requests.put(f'{self.base_url}/api/pets/{pet_id}', headers=headers, data=formData)
+        status = response.status_code
+        try:
+            result = response.json()
+        except BaseException:
+            result = response.text
+
+        return status, result
+
+    def add_new_pet_without_photo(self, auth_key, name, animal_type, age):
+        """
+        Этот метод позволяет добавить информацию о новом питомце без фото
+
+        :return:
+        """
+        headers = {'auth_key': auth_key['key']}
+        formData = {
+            'name': name,
+            'animal_type': animal_type,
+            'age': age
+        }
+
+        response = requests.post(f'{self.base_url}/api/create_pet_simple', headers=headers, data=formData)
+        status = response.status_code
+        try:
+            result = response.json()
+        except BaseException:
+            result = response.text
+
+        return status, result
+
+    def set_photo_pet(self, auth_key, pet_id, pet_photo):
+        """
+        Этот метод позволяет добавить фотографию питомца.
+
+        :return:
+        """
+        formData = MultipartEncoder(
+            fields={
+                'pet_photo': (pet_photo, open(pet_photo, 'rb'), 'image/jpeg')
+            }
+        )
+        headers = {'auth_key': auth_key['key'], 'Content-Type': formData.content_type}
+
+        response = requests.post(f'{self.base_url}/api/pets/set_photo/{pet_id}', headers=headers, data=formData)
         status = response.status_code
         try:
             result = response.json()
